@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Standen Operations</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Standen Ops">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' fill='%23080808'/><circle cx='90' cy='90' r='54' fill='none' stroke='white' stroke-width='5'/><text x='90' y='116' font-family='Georgia,serif' font-size='72' font-weight='400' fill='white' text-anchor='middle'>S</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#080808;--ink:#111;--ink2:#2C2C2C;--ink3:#5A5A5A;--ink4:#8A8A8A;
+    --rule:#DCDCD8;--bg:#F9F9F7;--bg2:#F2F2EF;--white:#fff;
+    --green:#1A3A2A;--green-bg:rgba(26,58,42,0.08);
+    --amber:#7A3520;--amber-bg:rgba(122,53,32,0.08);
+    --blue:#1E3A5F;--blue-bg:rgba(30,58,95,0.07);
+    --sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;overflow:hidden;}
+  body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;overscroll-behavior:none;}
+  .app{display:flex;flex-direction:column;height:100%;height:100dvh;}
+  .safe-top{background:var(--void);height:var(--st);flex-shrink:0;}
+
+  /* HEADER */
+  .header{background:var(--void);flex-shrink:0;padding:14px 20px 0;}
+  .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .wordmark{font-family:'Playfair Display',serif;font-size:19px;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:white;}
+  .wordmark span{font-style:italic;opacity:0.5;font-size:13px;letter-spacing:0.05em;text-transform:none;}
+  .hdate{font-size:9px;letter-spacing:0.2em;color:rgba(255,255,255,0.3);text-transform:uppercase;}
+  .northstar{font-size:10px;color:rgba(255,255,255,0.4);font-style:italic;font-family:'Playfair Display',serif;padding-bottom:13px;line-height:1.4;}
+
+  /* CONTENT */
+  .content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+  .view{display:none;}
+  .view.active{display:block;padding-bottom:28px;}
+  .vhdr{display:flex;justify-content:space-between;align-items:flex-end;padding:20px 20px 14px;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--rule);}
+  .vtitle{font-family:'Playfair Display',serif;font-size:25px;font-weight:400;line-height:1;}
+  .vsub{font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink4);margin-top:5px;}
+  .btn-add{width:36px;height:36px;background:var(--ink);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+  .btn-add:active{transform:scale(0.9);background:var(--ink2);}
+
+  /* TAB BAR */
+  .tab-bar{flex-shrink:0;background:var(--white);border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:var(--sb);}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 7px;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  .tab-l{font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink4);transition:color 0.15s;}
+  .tab svg{color:var(--ink4);transition:color 0.15s;}
+  .tab.active svg{color:var(--ink);}
+  .tab.active .tab-l{color:var(--ink);font-weight:500;}
+  .tab-dot{width:4px;height:4px;border-radius:50%;background:var(--ink);opacity:0;transition:opacity 0.15s;margin-top:-1px;}
+  .tab.active .tab-dot{opacity:1;}
+
+  /* SHARED ELEMENTS */
+  .sec-hdr{padding:18px 20px 8px;display:flex;justify-content:space-between;align-items:baseline;}
+  .sec-lbl{font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:var(--ink4);}
+  .sec-act{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  .card{background:var(--white);border:1px solid var(--rule);border-radius:14px;margin:0 20px 12px;padding:16px;}
+  .empty{text-align:center;padding:48px 28px;color:var(--ink4);}
+  .empty-t{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink3);margin-bottom:6px;}
+  .empty-s{font-size:12px;color:var(--ink4);line-height:1.6;}
+  .pill{display:inline-block;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;padding:3px 9px;border-radius:20px;font-weight:400;}
+  .pill-green{background:var(--green-bg);color:var(--green);}
+  .pill-amber{background:var(--amber-bg);color:var(--amber);}
+  .pill-blue{background:var(--blue-bg);color:var(--blue);}
+  .pill-grey{background:var(--bg2);color:var(--ink3);}
+
+  /* DASHBOARD */
+  .runway{margin:16px 20px;background:var(--void);border-radius:16px;padding:20px;color:white;}
+  .runway-lbl{font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:14px;}
+  .runway-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .runway-stat{text-align:center;}
+  .runway-v{font-family:'Playfair Display',serif;font-size:26px;color:white;display:block;line-height:1;margin-bottom:5px;}
+  .runway-k{font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.45);}
+  .goal-wrap{margin:0 20px 4px;}
+  .goal-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+  .goal-lbl{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink4);}
+  .goal-pct{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);}
+  .goal-bar{height:3px;background:var(--rule);border-radius:2px;overflow:hidden;}
+  .goal-fill{height:100%;background:var(--ink);border-radius:2px;transition:width 0.6s cubic-bezier(.4,0,.2,1);}
+  .goal-rem{font-size:11px;color:var(--ink4);margin-top:6px;font-style:italic;font-family:'Playfair Display',serif;}
+
+  /* MODE TOGGLE */
+  .mode-row{display:flex;gap:8px;margin:18px 20px 4px;}
+  .mode-btn{flex:1;padding:12px;border:1px solid var(--rule);border-radius:12px;background:var(--white);cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center;transition:all 0.15s;}
+  .mode-btn.on{background:var(--void);border-color:var(--void);}
+  .mode-btn.on .mode-t{color:white;}
+  .mode-btn.on .mode-d{color:rgba(255,255,255,0.5);}
+  .mode-t{font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink);font-weight:500;margin-bottom:3px;}
+  .mode-d{font-size:10px;color:var(--ink4);line-height:1.4;}
+
+  /* CHECKLIST */
+  .chk{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--rule);}
+  .chk:last-child{border-bottom:none;}
+  .chk-box{width:22px;height:22px;border:1.5px solid var(--ink3);border-radius:6px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;margin-top:1px;}
+  .chk-box.done{background:var(--ink);border-color:var(--ink);}
+  .chk-box svg{opacity:0;transition:opacity 0.15s;}
+  .chk-box.done svg{opacity:1;}
+  .chk-body{flex:1;}
+  .chk-t{font-size:13.5px;color:var(--ink);line-height:1.4;transition:all 0.15s;}
+  .chk.done .chk-t{color:var(--ink4);text-decoration:line-through;}
+  .chk-cat{font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink4);margin-top:3px;}
+
+  /* CLIENT LIFECYCLE */
+  .stage-track{display:flex;gap:5px;margin:10px 0 4px;}
+  .stage-seg{flex:1;height:4px;border-radius:2px;background:var(--rule);}
+  .stage-seg.fill{background:var(--green);}
+  .client-row{display:flex;justify-content:space-between;align-items:center;}
+  .client-name{font-family:'Playfair Display',serif;font-size:17px;}
+  .client-meta{font-size:11px;color:var(--ink4);margin-top:2px;}
+  .stage-now{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);margin-top:8px;}
+  .learn-note{background:var(--green-bg);border-radius:10px;padding:10px 12px;margin-top:11px;font-size:12px;color:var(--ink2);line-height:1.5;font-style:italic;}
+  .learn-note b{font-style:normal;font-weight:500;color:var(--green);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;display:block;margin-bottom:4px;}
+  .li-link{display:inline-flex;align-items:center;gap:7px;margin-top:11px;padding:8px 13px;background:var(--blue-bg);color:var(--blue);border-radius:9px;font-size:11px;letter-spacing:0.05em;text-decoration:none;font-weight:400;cursor:pointer;}
+  .li-link svg{flex-shrink:0;}
+  .li-link:active{opacity:0.7;}
+
+  /* PIPELINE */
+  .pipe-filters{display:flex;gap:6px;overflow-x:auto;padding:12px 20px;border-bottom:1px solid var(--rule);-webkit-overflow-scrolling:touch;}
+  .pf{padding:6px 13px;border:1px solid var(--rule);border-radius:20px;background:var(--white);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);white-space:nowrap;cursor:pointer;flex-shrink:0;font-family:'DM Sans',sans-serif;}
+  .pf.on{background:var(--ink);color:white;border-color:var(--ink);}
+
+  /* CONTENT MANAGER */
+  .post-draft{background:var(--white);border:1px solid var(--rule);border-radius:12px;margin:0 20px 10px;padding:14px;}
+  .post-draft-hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+  .post-n{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink4);}
+  .post-txt{font-size:13px;line-height:1.6;color:var(--ink);white-space:pre-wrap;}
+
+  /* MODALS */
+  .modal-bd{position:fixed;inset:0;background:rgba(8,8,8,0.5);z-index:500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px);}
+  .modal-bd.show{display:flex;}
+  .modal{background:var(--bg);width:100%;max-width:560px;max-height:90vh;border-radius:20px 20px 0 0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--sb) + 16px);animation:slideUp 0.28s cubic-bezier(.2,.8,.2,1);}
+  @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  .mhandle{width:38px;height:4px;background:var(--rule);border-radius:2px;margin:10px auto 4px;}
+  .mhdr{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 14px;border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--bg);z-index:2;}
+  .mtitle{font-family:'Playfair Display',serif;font-size:21px;}
+  .mclose{background:none;border:none;font-size:18px;color:var(--ink4);cursor:pointer;line-height:1;}
+  .mbody{padding:16px 20px;}
+  .fg{margin-bottom:15px;}
+  .flbl{display:block;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink4);margin-bottom:7px;}
+  .finput,.fselect,.ftextarea{width:100%;background:var(--white);border:1px solid var(--rule);border-radius:10px;padding:12px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);font-weight:300;}
+  .finput:focus,.fselect:focus,.ftextarea:focus{outline:none;border-color:var(--ink3);}
+  .ftextarea{min-height:90px;resize:vertical;line-height:1.5;}
+  .mactions{display:flex;gap:10px;padding:4px 20px 8px;}
+  .btn-cancel{flex:1;padding:14px;border:1px solid var(--rule);border-radius:11px;background:var(--white);color:var(--ink3);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  .btn-save{flex:2;padding:14px;border:none;border-radius:11px;background:var(--ink);color:white;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  .btn-save:active{background:var(--ink2);}
+
+  /* RHYTHM REFERENCE */
+  .rhythm-card{margin:0 20px 12px;background:var(--white);border:1px solid var(--rule);border-radius:14px;overflow:hidden;}
+  .rhythm-hd{padding:14px 16px;background:var(--bg2);font-family:'Playfair Display',serif;font-size:16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+  .rhythm-hd .rc{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink4);font-family:'DM Sans',sans-serif;}
+  .rhythm-body{padding:4px 16px 14px;}
+  .rstep{padding:11px 0;border-bottom:1px solid var(--rule);font-size:13px;line-height:1.5;color:var(--ink2);}
+  .rstep:last-child{border-bottom:none;}
+  .rstep b{font-weight:500;color:var(--ink);}
+  .collapsed .rhythm-body{display:none;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="safe-top"></div>
+  <div class="header">
+    <div class="header-top">
+      <div class="wordmark">Standen <span>Operations</span></div>
+      <div class="hdate" id="hdate"></div>
+    </div>
+    <div class="northstar">A three-year build. Today's action should serve this week — and year two.</div>
+  </div>
+
+  <div class="content" id="content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="view active" id="v-dash">
+      <div class="vhdr"><div><div class="vtitle">Today</div><div class="vsub" id="greeting">Day 1 of the build</div></div></div>
+
+      <div class="runway">
+        <div class="runway-lbl">The Build · At a glance</div>
+        <div class="runway-grid">
+          <div class="runway-stat"><span class="runway-v" id="rsClients">0</span><span class="runway-k">Clients</span></div>
+          <div class="runway-stat"><span class="runway-v" id="rsPosts">0</span><span class="runway-k">Posts Live</span></div>
+          <div class="runway-stat"><span class="runway-v" id="rsMRR">$0</span><span class="runway-k">MRR</span></div>
+        </div>
+      </div>
+
+      <div class="goal-wrap">
+        <div class="goal-row"><span class="goal-lbl">Toward $4,500 / mo</span><span class="goal-pct" id="gPct">0%</span></div>
+        <div class="goal-bar"><div class="goal-fill" id="gFill" style="width:0%"></div></div>
+        <div class="goal-rem" id="gRem">The first three clients are proof, not the point.</div>
+      </div>
+
+      <div class="sec-hdr"><span class="sec-lbl">Today's Rhythm</span><button class="sec-act" onclick="resetDaily()">Reset</button></div>
+      <div class="card" id="dailyList"></div>
+
+      <div class="sec-hdr"><span class="sec-lbl">Open Loops</span></div>
+      <div id="openLoops"></div>
+    </div>
+
+    <!-- ===== CLIENTS ===== -->
+    <div class="view" id="v-clients">
+      <div class="vhdr"><div><div class="vtitle">Clients</div><div class="vsub">Lifecycle &amp; expertise gained</div></div><button class="btn-add" onclick="openM('client')"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><line x1="9" y1="3" x2="9" y2="15" stroke="white" stroke-width="1.6" stroke-linecap="round"/><line x1="3" y1="9" x2="15" y2="9" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
+      <div id="clientsList"></div>
+    </div>
+
+    <!-- ===== PIPELINE ===== -->
+    <div class="view" id="v-pipe">
+      <div class="vhdr"><div><div class="vtitle">Pipeline</div><div class="vsub">Outreach targets</div></div><button class="btn-add" onclick="openM('target')"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><line x1="9" y1="3" x2="9" y2="15" stroke="white" stroke-width="1.6" stroke-linecap="round"/><line x1="3" y1="9" x2="15" y2="9" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
+      <div class="pipe-filters" id="pipeFilters"></div>
+      <div id="pipeList"></div>
+    </div>
+
+    <!-- ===== CONTENT ===== -->
+    <div class="view" id="v-content">
+      <div class="vhdr"><div><div class="vtitle">Content</div><div class="vsub">Draft · approve · schedule</div></div><button class="btn-add" onclick="openM('post')"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><line x1="9" y1="3" x2="9" y2="15" stroke="white" stroke-width="1.6" stroke-linecap="round"/><line x1="3" y1="9" x2="15" y2="9" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
+      <div id="contentList"></div>
+    </div>
+
+    <!-- ===== SYSTEM ===== -->
+    <div class="view" id="v-system">
+      <div class="vhdr"><div><div class="vtitle">System</div><div class="vsub">Your three rhythms</div></div></div>
+      <div id="rhythmRef"></div>
+    </div>
+
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab active" onclick="sw('v-dash',this)"><svg width="21" height="21" viewBox="0 0 21 21" fill="none"><rect x="2.5" y="2.5" width="7" height="7" stroke="currentColor" stroke-width="1.4"/><rect x="11.5" y="2.5" width="7" height="7" stroke="currentColor" stroke-width="1.4"/><rect x="2.5" y="11.5" width="7" height="7" stroke="currentColor" stroke-width="1.4"/><rect x="11.5" y="11.5" width="7" height="7" stroke="currentColor" stroke-width="1.4"/></svg><span class="tab-l">Today</span><div class="tab-dot"></div></button>
+    <button class="tab" onclick="sw('v-clients',this)"><svg width="21" height="21" viewBox="0 0 21 21" fill="none"><circle cx="10.5" cy="7" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M3.5 18c0-4 3.13-6.5 7-6.5s7 2.5 7 6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span class="tab-l">Clients</span><div class="tab-dot"></div></button>
+    <button class="tab" onclick="sw('v-pipe',this)"><svg width="21" height="21" viewBox="0 0 21 21" fill="none"><line x1="7" y1="5" x2="18" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="7" y1="10.5" x2="18" y2="10.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="7" y1="16" x2="18" y2="16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="3" cy="5" r="1.1" fill="currentColor"/><circle cx="3" cy="10.5" r="1.1" fill="currentColor"/><circle cx="3" cy="16" r="1.1" fill="currentColor"/></svg><span class="tab-l">Pipeline</span><div class="tab-dot"></div></button>
+    <button class="tab" onclick="sw('v-content',this)"><svg width="21" height="21" viewBox="0 0 21 21" fill="none"><path d="M3 4.5a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.4"/><line x1="6" y1="7.5" x2="15" y2="7.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="6" y1="10.5" x2="15" y2="10.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="6" y1="13.5" x2="11" y2="13.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span class="tab-l">Content</span><div class="tab-dot"></div></button>
+    <button class="tab" onclick="sw('v-system',this)"><svg width="21" height="21" viewBox="0 0 21 21" fill="none"><circle cx="10.5" cy="10.5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 2v2M10.5 17v2M2 10.5h2M17 10.5h2M4.6 4.6l1.4 1.4M15 15l1.4 1.4M16.4 4.6L15 6M6 15l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span class="tab-l">System</span><div class="tab-dot"></div></button>
+  </div>
+</div>
+<div id="modals"></div>
+<script>
+/* ============ DATA ============ */
+const START_KEY='standen_ops_start';
+if(!localStorage.getItem(START_KEY)) localStorage.setItem(START_KEY, Date.now());
+const _raw=JSON.parse(localStorage.getItem('standen_ops_v1')||'null')||{
+  clients:[], targets:[], posts:[], daily:{date:'',items:{}}, mode:'action', dailyHistory:[]
+};
+const DB=Object.assign({clients:[],targets:[],posts:[],daily:{date:'',items:{}},mode:'action',dailyHistory:[]},_raw);
+const persist=()=>localStorage.setItem('standen_ops_v1',JSON.stringify(DB));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const todayStr=()=>new Date().toISOString().slice(0,10);
+const fmtMoney=n=>'$'+(n||0).toLocaleString();
+
+/* ============ DAILY RHYTHM TEMPLATE ============ */
+const DAILY_TEMPLATE=[
+  {id:'still', t:'10 minutes of stillness before the phone', cat:'Foundation'},
+  {id:'study', t:'30 minutes of real GRC study (not a course — a concept, a breach, a rule)', cat:'D · Deepen expertise'},
+  {id:'action', t:'One LinkedIn action: post, three thoughtful comments, or one DM', cat:'A/C · Win clients · Authority'}
+];
+
+/* ============ CLIENT LIFECYCLE STAGES ============ */
+const STAGES=['Prospect','Positioning Call','Intake Sent','Voice Guide','First Batch','Approval','Live','Referral Ask'];
+const STAGE_LEARN={
+  'Prospect':'What signal made them a fit? Note it — it sharpens your targeting.',
+  'Positioning Call':'How do they talk about their own work? That language IS their voice guide.',
+  'Intake Sent':'Which intake answers surprised you? That gap is where the real positioning lives.',
+  'Voice Guide':'Capturing their voice teaches you how GRC leaders actually think. Write down one belief of theirs you didn\'t expect.',
+  'First Batch':'Translating their expertise into posts = your fastest GRC education. What did you have to learn to write these?',
+  'Approval':'What did they change? Their edits reveal what they actually care about being known for.',
+  'Live':'Which post landed? Engagement teaches you what the GRC audience values.',
+  'Referral Ask':'Who did they point you to? Their network is a map of your next clients.'
+};
+
+/* ============ TARGET PIPELINE STAGES ============ */
+const PIPE=['Identified','Warming','Contacted','Replied','Audit Sent','Offer Sent','Closed','Passed'];
+
+/* ============ NAV ============ */
+function sw(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('content').scrollTop=0;
+  if(id==='v-content'){openFolder=null;renderContent();}
+}
+
+/* ============ DAILY ============ */
+function ensureDaily(){
+  const t=todayStr();
+  if(DB.daily.date!==t){
+    // archive yesterday to history
+    if(DB.daily.date){
+      const done=Object.values(DB.daily.items).filter(Boolean).length;
+      DB.dailyHistory.unshift({date:DB.daily.date,done:done,total:DAILY_TEMPLATE.length});
+      DB.dailyHistory=DB.dailyHistory.slice(0,60);
+    }
+    DB.daily={date:t,items:{}};
+    persist();
+  }
+}
+function toggleDaily(id){
+  DB.daily.items[id]=!DB.daily.items[id]; persist(); renderDaily();
+}
+function resetDaily(){
+  DB.daily.items={}; persist(); renderDaily();
+}
+function renderDaily(){
+  ensureDaily();
+  const el=document.getElementById('dailyList');
+  el.innerHTML=DAILY_TEMPLATE.map(d=>{
+    const done=DB.daily.items[d.id];
+    return `<div class="chk ${done?'done':''}">
+      <div class="chk-box ${done?'done':''}" onclick="toggleDaily('${d.id}')">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.8l2.6 2.6 5.4-5.8" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="chk-body"><div class="chk-t">${d.t}</div><div class="chk-cat">${d.cat}</div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ============ DASHBOARD STATS ============ */
+function renderDash(){
+  const clients=DB.clients.filter(c=>c.stage!=='Passed');
+  const liveClients=DB.clients.filter(c=>['Live','Referral Ask'].includes(c.stage));
+  const mrr=DB.clients.filter(c=>['Approval','Live','Referral Ask'].includes(c.stage)).reduce((s,c)=>s+(+c.retainer||0),0);
+  const postsLive=DB.posts.filter(p=>p.status==='Live').length;
+  document.getElementById('rsClients').textContent=liveClients.length;
+  document.getElementById('rsPosts').textContent=postsLive;
+  document.getElementById('rsMRR').textContent=fmtMoney(mrr);
+  const pct=Math.min(100,Math.round(mrr/4500*100));
+  document.getElementById('gPct').textContent=pct+'%';
+  document.getElementById('gFill').style.width=pct+'%';
+  document.getElementById('gRem').textContent= mrr>=4500 ? 'Proof secured. Now build the firm.' : fmtMoney(4500-mrr)+' to first proof — the three-client mark.';
+  // day counter
+  const days=Math.floor((Date.now()-(+localStorage.getItem(START_KEY)))/86400000)+1;
+  document.getElementById('greeting').textContent='Day '+days+' of the build';
+  // open loops: active clients needing a next step + warm targets
+  const loops=[];
+  DB.clients.filter(c=>!['Live','Referral Ask','Passed'].includes(c.stage)).forEach(c=>{
+    loops.push({t:c.name+' — next: '+nextStageOf(c.stage), tag:'Client'});
+  });
+  DB.targets.filter(t=>['Replied','Audit Sent','Offer Sent'].includes(t.stage)).forEach(t=>{
+    loops.push({t:t.name+' — '+t.stage+', needs follow-up', tag:'Pipeline'});
+  });
+  const ol=document.getElementById('openLoops');
+  if(!loops.length){
+    ol.innerHTML=`<div class="card"><div class="empty" style="padding:24px"><div class="empty-s">No open loops. If the pipeline is empty too, that's the signal to add targets and send a DM — not to build more systems.</div></div></div>`;
+  } else {
+    ol.innerHTML='<div class="card">'+loops.map((l,i)=>`<div class="chk" style="${i===loops.length-1?'border-bottom:none':''}"><div class="chk-body"><div class="chk-t">${l.t}</div><div class="chk-cat">${l.tag}</div></div></div>`).join('')+'</div>';
+  }
+}
+function nextStageOf(s){const i=STAGES.indexOf(s);return i>=0&&i<STAGES.length-1?STAGES[i+1]:'—';}
+
+/* ============ CLIENTS ============ */
+function renderClients(){
+  const el=document.getElementById('clientsList');
+  if(!DB.clients.length){el.innerHTML=`<div class="empty"><div class="empty-t">No clients yet.</div><div class="empty-s">Add one when a prospect says yes — or add a test client to walk the flow.</div></div>`;return;}
+  el.innerHTML=DB.clients.map(c=>{
+    const idx=STAGES.indexOf(c.stage);
+    const segs=STAGES.map((s,i)=>`<div class="stage-seg ${i<=idx?'fill':''}"></div>`).join('');
+    return `<div class="card" onclick="openClient('${c.id}')">
+      <div class="client-row"><div><div class="client-name">${c.name}</div><div class="client-meta">${c.role||'—'}${c.company?' · '+c.company:''}${c.retainer?' · '+fmtMoney(c.retainer)+'/mo':''}</div></div>
+      <span class="pill ${idx>=6?'pill-green':idx>=2?'pill-blue':'pill-grey'}">${c.stage}</span></div>
+      <div class="stage-track">${segs}</div>
+      <div class="stage-now">Next: ${nextStageOf(c.stage)}</div>
+      ${c.learned?`<div class="learn-note"><b>Expertise gained</b>${c.learned}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+/* ============ PIPELINE ============ */
+let pipeFilter='All';
+function renderPipe(){
+  const f=document.getElementById('pipeFilters');
+  const filters=['All',...PIPE];
+  f.innerHTML=filters.map(x=>`<button class="pf ${pipeFilter===x?'on':''}" onclick="pipeFilter='${x}';renderPipe()">${x}</button>`).join('');
+  const el=document.getElementById('pipeList');
+  let list=DB.targets;
+  if(pipeFilter!=='All') list=list.filter(t=>t.stage===pipeFilter);
+  if(!list.length){el.innerHTML=`<div class="empty"><div class="empty-t">${DB.targets.length?'None in this stage.':'No targets yet.'}</div><div class="empty-s">${DB.targets.length?'':'Add 20 GRC directors or compliance leaders at mid-market companies. Name, title, company, and the gap you noticed.'}</div></div>`;return;}
+  el.innerHTML=list.map(t=>`<div class="card" onclick="openTarget('${t.id}')">
+    <div class="client-row"><div><div class="client-name" style="font-size:16px">${t.name}</div><div class="client-meta">${t.role||'—'}${t.company?' · '+t.company:''}</div></div>
+    <span class="pill ${['Closed'].includes(t.stage)?'pill-green':['Replied','Audit Sent','Offer Sent'].includes(t.stage)?'pill-amber':t.stage==='Passed'?'pill-grey':'pill-blue'}">${t.stage}</span></div>
+    ${t.gap?`<div class="client-meta" style="margin-top:8px;font-style:italic">"${t.gap}"</div>`:''}
+    ${t.li?`<span class="li-link" onclick="event.stopPropagation();openLink('${normLink(t.li).replace(/'/g,"\\'")}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 0 1-2.06-2.07 2.06 2.06 0 1 1 2.06 2.07zm1.78 13.02H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>View LinkedIn profile</span>`:''}
+    ${t.next?`<div class="client-meta" style="margin-top:7px"><span style="color:var(--ink3)">Next:</span> ${t.next}</div>`:''}
+    ${t.learned?`<div class="learn-note"><b>What this taught me</b>${t.learned}</div>`:''}
+  </div>`).join('');
+}
+/* normalize a pasted LinkedIn URL so it's always a valid clickable link */
+function normLink(u){
+  u=(u||'').trim();
+  if(!u) return '#';
+  // bare LinkedIn path like "/in/jane" or "in/jane" → assume linkedin.com
+  if(/^\/?(in|company|pub)\//i.test(u)) u='https://www.linkedin.com/'+u.replace(/^\/+/,'');
+  else if(!/^https?:\/\//i.test(u)) u='https://'+u.replace(/^\/+/,'');
+  return u;
+}
+/* Reliable link open — works in browser AND iOS home-screen standalone mode,
+   where target=_blank and stopPropagation can silently swallow navigation. */
+function openLink(url){
+  if(!url||url==='#'){toast('No LinkedIn URL saved for this target');return;}
+  try{
+    const w=window.open(url,'_blank');
+    if(!w){ window.location.href=url; } // popup blocked / standalone → navigate directly
+  }catch(e){ window.location.href=url; }
+}
+
+/* ============ CONTENT — organized by client folder ============ */
+let openFolder=null;
+function renderContent(){
+  const el=document.getElementById('contentList');
+  // Build folder list: Standen (own) + each client
+  const folders=[{key:'',label:'Standen',sub:'Your own authority posts'}]
+    .concat(DB.clients.map(c=>({key:c.name,label:c.name,sub:(c.role||'')+(c.company?' · '+c.company:'')})));
+
+  if(openFolder===null){
+    // FOLDER GRID VIEW
+    el.innerHTML=folders.map(f=>{
+      const posts=DB.posts.filter(p=>(p.client||'')===f.key);
+      const live=posts.filter(p=>p.status==='Live').length;
+      const pending=posts.filter(p=>['Draft','In Review','Needs Revision'].includes(p.status)).length;
+      return `<div class="card" onclick="openFolder='${f.key.replace(/'/g,"\\'")}';renderContent()" style="display:flex;justify-content:space-between;align-items:center">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:9px">
+            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0"><path d="M2 4.2a1 1 0 0 1 1-1h3.6l1.4 1.5H14a1 1 0 0 1 1 1v7.6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" stroke="var(--ink3)" stroke-width="1.3"/></svg>
+            <div class="client-name" style="font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.label}</div>
+          </div>
+          <div class="client-meta" style="margin-top:5px;margin-left:26px">${posts.length} post${posts.length!==1?'s':''}${live?' · '+live+' live':''}${pending?' · '+pending+' in progress':''}</div>
+        </div>
+        <svg width="9" height="14" viewBox="0 0 9 14" fill="none" style="flex-shrink:0"><path d="M1.5 1l6 6-6 6" stroke="var(--ink4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>`;
+    }).join('') + `<div style="padding:8px 20px 28px;text-align:center;font-size:11px;color:var(--ink4);font-style:italic;font-family:'Playfair Display',serif">Each client keeps their voice guide, intake, and posts together.<br>Tap a client's name in the Clients tab to see their full profile.</div>`;
+    return;
+  }
+
+  // INSIDE A FOLDER
+  const folder=folders.find(f=>f.key===openFolder)||folders[0];
+  const posts=DB.posts.filter(p=>(p.client||'')===openFolder);
+  const client=DB.clients.find(c=>c.name===openFolder);
+  let head=`<div class="card" style="background:var(--bg2);border:none;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="openFolder=null;renderContent()">
+      <svg width="9" height="14" viewBox="0 0 9 14" fill="none"><path d="M7.5 1l-6 6 6 6" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><div class="post-n">All folders</div><div class="client-name" style="font-size:18px">${folder.label}</div></div>
+    </div>`;
+  // If client folder, surface voice guide + intake quick-access
+  if(client){
+    head+=`<div class="card" style="margin-top:0">
+      <div class="post-n" style="margin-bottom:10px">Reference — pulled from this client's profile</div>
+      <div class="rstep" style="border-bottom:1px solid var(--rule)"><b>Voice guide:</b> ${client.voice?client.voice:'<span style="color:var(--ink4)">not captured yet — add it in the Clients tab</span>'}</div>
+      <div class="rstep" style="border-bottom:none"><b>Wants to be known for:</b> ${client.goal?client.goal:'<span style="color:var(--ink4)">not set yet</span>'}</div>
+    </div>`;
+  }
+  let body;
+  if(!posts.length){
+    body=`<div class="empty"><div class="empty-t">No posts in this folder.</div><div class="empty-s">Tap + to draft the first one${client?' for '+client.name:''}.</div></div>`;
+  } else {
+    body=posts.map(p=>`<div class="post-draft">
+      <div class="post-draft-hd"><span class="post-n">${p.tag||'Post'}</span>
+      <span class="pill ${p.status==='Live'?'pill-green':p.status==='Approved'||p.status==='Scheduled'?'pill-blue':p.status==='Needs Revision'?'pill-amber':'pill-grey'}">${p.status}</span></div>
+      <div class="post-txt" onclick="openPost('${p.id}')">${(p.text||'')}</div>
+      ${p.feedback?`<div class="learn-note" style="margin-top:10px"><b>Client feedback</b>${p.feedback}</div>`:''}
+      <div style="display:flex;gap:8px;margin-top:11px">
+        <button class="btn-cancel" style="flex:1;padding:9px" onclick="copyPost('${p.id}')">Copy text</button>
+        <button class="btn-cancel" style="flex:1;padding:9px" onclick="openPost('${p.id}')">Edit</button>
+      </div>
+    </div>`).join('');
+  }
+  el.innerHTML=head+body;
+}
+function copyPost(id){
+  const p=DB.posts.find(x=>x.id===id); if(!p)return;
+  const txt=p.text||'';
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>toast('Post copied — paste into your email or LinkedIn')).catch(()=>fallbackCopy(txt));
+  } else fallbackCopy(txt);
+}
+function fallbackCopy(txt){
+  const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Post copied');}catch(e){toast('Copy not supported — select manually');}
+  document.body.removeChild(ta);
+}
+function toast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--void);color:white;padding:11px 18px;border-radius:30px;font-size:12px;z-index:900;max-width:80%;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,0.25)';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._h);t._h=setTimeout(()=>t.style.opacity='0',2200);
+  t.style.transition='opacity 0.3s';
+}
+
+/* ============ SYSTEM / RHYTHM REFERENCE ============ */
+const RHYTHMS=[
+  {title:'Daily Rhythm', cad:'Every day', steps:[
+    '<b>Stillness first.</b> 10 minutes before the phone. You value staying still in chaos — start there.',
+    '<b>Study 30 min.</b> One real GRC concept, breach, or rule. Not a course. Credibility fuel.',
+    '<b>One LinkedIn action.</b> Post, three thoughtful comments, or one DM. Just one. Every day.'
+  ]},
+  {title:'Outreach Rhythm', cad:'Hunting for clients', steps:[
+    '<b>Build the list.</b> 20 GRC directors / compliance leaders at mid-market firms (200–2,000 people).',
+    '<b>Warm them.</b> Follow, comment, like for a week. Land on their radar honestly — no cold DMs yet.',
+    '<b>DM.</b> 5/day. One observation about their gap, one line on what you do, one soft ask.',
+    '<b>Reply → call.</b> Within 24h, offer a 15-min call. Listen more than you talk.',
+    '<b>Audit.</b> 3 gaps, 3 concrete rewrites. Send with the intake link.',
+    '<b>Offer.</b> One-page agreement + Stripe link. "One month, $1,500, we see if my voice matches yours."'
+  ]},
+  {title:'Client Rhythm', cad:'Once they sign', steps:[
+    '<b>Positioning call.</b> 30 min. The five questions. Learn them, don\'t sell them.',
+    '<b>Intake.</b> Send the deep form async. Start their voice guide from the call.',
+    '<b>Voice guide.</b> Their beliefs, tone, what they\'d never say. This is the moat.',
+    '<b>Batch.</b> 8–12 posts in their voice. Store and draft them here in Content.',
+    '<b>Approval.</b> They approve/revise each post + leave notes. Tracked live.',
+    '<b>Schedule.</b> Approved posts to Buffer. Recap email to client.',
+    '<b>Referral ask.</b> After two weeks: "One person in your network who\'d benefit?"'
+  ]}
+];
+function renderRhythm(){
+  document.getElementById('rhythmRef').innerHTML=RHYTHMS.map((r,i)=>`<div class="rhythm-card ${i!==0?'collapsed':''}" id="rc${i}">
+    <div class="rhythm-hd" onclick="document.getElementById('rc${i}').classList.toggle('collapsed')"><span>${r.title}</span><span class="rc">${r.cad}</span></div>
+    <div class="rhythm-body">${r.steps.map(s=>`<div class="rstep">${s}</div>`).join('')}</div>
+  </div>`).join('')
+  + `<div style="padding:6px 20px 18px;text-align:center;font-size:11px;color:var(--ink4);font-style:italic;font-family:'Playfair Display',serif;line-height:1.6">All three rhythms run at once. While you deliver client one,<br>you're warming client two and closing client three.</div>`
+  + `<div class="sec-hdr"><span class="sec-lbl">Logged Next-Builds</span></div>
+     <div class="rhythm-card collapsed" id="nb0">
+       <div class="rhythm-hd" onclick="document.getElementById('nb0').classList.toggle('collapsed')"><span style="font-size:15px">Client Approval Portal</span><span class="rc" style="color:var(--amber)">Trigger: client #1 signs</span></div>
+       <div class="rhythm-body">
+         <div class="rstep"><b>What it is:</b> a real shareable link that lets a client open their post batch on their own phone, check approved / not-approved per post, type feedback, and have it sync straight back to this app — live.</div>
+         <div class="rstep"><b>Why it's not built yet:</b> it needs a small backend (Firebase or Supabase) to sync across devices. localStorage only lives on your device, so a share link built today would show the client nothing. Building it before a client exists = untested, unused, and maintained for a problem you don't have.</div>
+         <div class="rstep"><b>The trigger:</b> the day client #1 signs, say the word and we build it properly — tested against a real client, shaped by how you actually deliver. Until then, use Copy Text in the Content tab to send drafts by email or LinkedIn and log their feedback here.</div>
+         <div class="rstep" style="border-bottom:none"><b>Est. effort:</b> 2–3 focused hours + one free account. Worth its keep the moment it's earning.</div>
+       </div>
+     </div>`
+  + `<div class="sec-hdr"><span class="sec-lbl">Conversation Scripts</span></div>
+     <div class="rhythm-card collapsed" id="sc0">
+       <div class="rhythm-hd" onclick="document.getElementById('sc0').classList.toggle('collapsed')"><span style="font-size:15px">The Four Conversations</span><span class="rc">Practice out loud</span></div>
+       <div class="rhythm-body">
+         <div class="rstep"><b>Mindset:</b> You're offering, not asking. You noticed something true — their expertise is real, their visibility isn't — and you can fix it. If they say no, you've lost nothing.</div>
+         <div class="rstep"><b>1 · Cold DM:</b> One specific thing you noticed about them. One honest line on the visibility gap. One soft door — "would it be worth a short conversation?" No pitch, no ask for money.</div>
+         <div class="rstep"><b>2 · Call opener:</b> "This isn't a pitch — I want to understand your world, then I'll be honest about whether I can help." Then ask what changed, what's hardest to explain about their work, what they want people to think. Listen more than you talk.</div>
+         <div class="rstep"><b>3 · Audit handoff:</b> Three things — what the profile says, what's missing, what to do instead. Give real value free. Then send the intake questionnaire.</div>
+         <div class="rstep" style="border-bottom:none"><b>4 · Soft offer:</b> "One month, [price], you approve everything before it goes live. The point of month one is to see if it sounds like you. If it doesn't, we stop, no hard feelings." Then send agreement + Stripe link and stop talking.</div>
+       </div>
+     </div>
+     <div style="padding:2px 20px 30px"></div>`;
+}
+
+/* ============ MODALS ============ */
+function openM(type,data){renderModal(type,data);document.getElementById('m-'+type).classList.add('show');}
+function closeM(type){const m=document.getElementById('m-'+type);if(m)m.classList.remove('show');}
+function renderModal(type,data){
+  const host=document.getElementById('modals');
+  let existing=document.getElementById('m-'+type);
+  if(existing) existing.remove();
+  let inner='';
+  if(type==='client'){
+    const d=data||{};
+    inner=`<div class="fg"><label class="flbl">Name</label><input class="finput" id="c-name" value="${d.name||''}" placeholder="Jane Smith"></div>
+      <div class="fg"><label class="flbl">Role</label><input class="finput" id="c-role" value="${d.role||''}" placeholder="VP Compliance"></div>
+      <div class="fg"><label class="flbl">Company</label><input class="finput" id="c-co" value="${d.company||''}" placeholder="Company"></div>
+      <div class="fg"><label class="flbl">Monthly Retainer ($)</label><input class="finput" type="number" id="c-ret" value="${d.retainer||''}" placeholder="1500"></div>
+      <div class="fg"><label class="flbl">Stage</label><select class="fselect" id="c-stage">${STAGES.map(s=>`<option ${d.stage===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="fg"><label class="flbl">Positioning goal — what they want to be known for</label><textarea class="ftextarea" id="c-goal" placeholder="...">${d.goal||''}</textarea></div>
+      <div class="fg"><label class="flbl">Voice guide — tone, beliefs, words to use / avoid</label><textarea class="ftextarea" id="c-voice" placeholder="...">${d.voice||''}</textarea></div>
+      <div class="fg"><label class="flbl">Intake responses (paste or summarize)</label><textarea class="ftextarea" id="c-intake" placeholder="...">${d.intake||''}</textarea></div>
+      <div class="fg"><label class="flbl">Expertise gained from this client</label><textarea class="ftextarea" id="c-learned" placeholder="What did working with them teach you about GRC?">${d.learned||''}</textarea></div>`;
+    host.insertAdjacentHTML('beforeend',modalShell('client','Client',inner,`saveClient('${d.id||''}')`, d.id?`delClient('${d.id}')`:''));
+  }
+  if(type==='target'){
+    const d=data||{};
+    inner=`<div class="fg"><label class="flbl">Name</label><input class="finput" id="t-name" value="${d.name||''}" placeholder="Jane Smith"></div>
+      <div class="fg"><label class="flbl">Role</label><input class="finput" id="t-role" value="${d.role||''}" placeholder="GRC Director"></div>
+      <div class="fg"><label class="flbl">Company</label><input class="finput" id="t-co" value="${d.company||''}" placeholder="Company"></div>
+      <div class="fg"><label class="flbl">LinkedIn URL</label><input class="finput" id="t-li" value="${d.li||''}" placeholder="linkedin.com/in/..."></div>
+      <div class="fg"><label class="flbl">The gap you noticed</label><textarea class="ftextarea" id="t-gap" placeholder="Strong expertise, generic headline, posts twice a year...">${d.gap||''}</textarea></div>
+      <div class="fg"><label class="flbl">Stage</label><select class="fselect" id="t-stage">${PIPE.map(s=>`<option ${d.stage===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="fg"><label class="flbl">Last contact / next step</label><input class="finput" id="t-next" value="${d.next||''}" placeholder="DM sent 6/5 — follow up 6/9"></div>
+      <div class="fg"><label class="flbl">What this taught me about GRC leaders</label><textarea class="ftextarea" id="t-learned" placeholder="Optional — note any insight">${d.learned||''}</textarea></div>`;
+    host.insertAdjacentHTML('beforeend',modalShell('target','Target',inner,`saveTarget('${d.id||''}')`, d.id?`delTarget('${d.id}')`:''));
+  }
+  if(type==='post'){
+    const d=data||{};
+    const activeClient = d.client!==undefined ? d.client : (openFolder||'');
+    const clientOpts=['<option value="" '+(activeClient===''?'selected':'')+'>Standen (your own)</option>',...DB.clients.map(c=>`<option ${activeClient===c.name?'selected':''}>${c.name}</option>`)].join('');
+    const statuses=['Draft','In Review','Needs Revision','Approved','Scheduled','Live'];
+    inner=`<div class="fg"><label class="flbl">For</label><select class="fselect" id="p-client">${clientOpts}</select></div>
+      <div class="fg"><label class="flbl">Tag</label><select class="fselect" id="p-tag">${['Industry Insight','Contrarian Take','Standen / Transparency','Thought Leadership','Other'].map(x=>`<option ${d.tag===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div class="fg"><label class="flbl">Post text</label><textarea class="ftextarea" id="p-text" style="min-height:150px" placeholder="Write the post...">${d.text||''}</textarea></div>
+      <div class="fg"><label class="flbl">Status</label><select class="fselect" id="p-status">${statuses.map(s=>`<option ${d.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      ${d.feedback?`<div class="fg"><label class="flbl">Client feedback</label><div class="learn-note" style="margin-top:0">${d.feedback}</div></div>`:''}`;
+    host.insertAdjacentHTML('beforeend',modalShell('post','Post',inner,`savePost('${d.id||''}')`, d.id?`delPost('${d.id}')`:''));
+  }
+}
+function modalShell(type,title,body,saveFn,delFn){
+  return `<div class="modal-bd" id="m-${type}" onclick="if(event.target===this)closeM('${type}')"><div class="modal"><div class="mhandle"></div>
+    <div class="mhdr"><div class="mtitle">${title}</div><button class="mclose" onclick="closeM('${type}')">✕</button></div>
+    <div class="mbody">${body}</div>
+    <div class="mactions">${delFn?`<button class="btn-cancel" onclick="${delFn}">Delete</button>`:`<button class="btn-cancel" onclick="closeM('${type}')">Cancel</button>`}<button class="btn-save" onclick="${saveFn}">Save</button></div>
+  </div></div>`;
+}
+const val=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+
+/* ---- SAVE/EDIT/DELETE: CLIENTS ---- */
+function saveClient(id){
+  const obj={id:id||uid(),name:val('c-name'),role:val('c-role'),company:val('c-co'),retainer:+val('c-ret')||0,stage:val('c-stage'),goal:val('c-goal'),voice:val('c-voice'),intake:val('c-intake'),learned:val('c-learned')};
+  if(!obj.name){alert('Name required');return;}
+  const i=DB.clients.findIndex(c=>c.id===id);
+  if(i>=0)DB.clients[i]=obj;else DB.clients.push(obj);
+  persist();closeM('client');renderAll();
+}
+function openClient(id){const c=DB.clients.find(x=>x.id===id);renderModal('client',c);document.getElementById('m-client').classList.add('show');}
+function delClient(id){confirmDel('client',id,()=>{DB.clients=DB.clients.filter(c=>c.id!==id);persist();closeM('client');renderAll();});}
+
+/* ---- TARGETS ---- */
+function saveTarget(id){
+  const obj={id:id||uid(),name:val('t-name'),role:val('t-role'),company:val('t-co'),li:val('t-li'),gap:val('t-gap'),stage:val('t-stage'),next:val('t-next'),learned:val('t-learned')};
+  if(!obj.name){alert('Name required');return;}
+  const i=DB.targets.findIndex(t=>t.id===id);
+  if(i>=0)DB.targets[i]=obj;else DB.targets.push(obj);
+  persist();closeM('target');renderAll();
+}
+function openTarget(id){const t=DB.targets.find(x=>x.id===id);renderModal('target',t);document.getElementById('m-target').classList.add('show');}
+function delTarget(id){confirmDel('target',id,()=>{DB.targets=DB.targets.filter(t=>t.id!==id);persist();closeM('target');renderAll();});}
+
+/* ---- POSTS ---- */
+function savePost(id){
+  const obj={id:id||uid(),client:val('p-client'),tag:val('p-tag'),text:val('p-text'),status:val('p-status'),feedback:(DB.posts.find(p=>p.id===id)||{}).feedback||''};
+  if(!obj.text){alert('Post text required');return;}
+  const i=DB.posts.findIndex(p=>p.id===id);
+  if(i>=0)DB.posts[i]=obj;else DB.posts.push(obj);
+  persist();closeM('post');renderAll();
+}
+function openPost(id){const p=DB.posts.find(x=>x.id===id);renderModal('post',p);document.getElementById('m-post').classList.add('show');}
+function delPost(id){confirmDel('post',id,()=>{DB.posts=DB.posts.filter(p=>p.id!==id);persist();closeM('post');renderAll();});}
+
+/* Two-tap delete confirmation — reliable in standalone/home-screen apps where confirm() is suppressed */
+let _pendingDel=null;
+function confirmDel(type,id,doDelete){
+  const btn=document.querySelector('#m-'+type+' .mactions .btn-cancel');
+  if(_pendingDel===type+id){
+    _pendingDel=null;
+    doDelete();
+  } else {
+    _pendingDel=type+id;
+    if(btn){
+      btn.textContent='Tap again to delete';
+      btn.style.color='#fff';
+      btn.style.background='var(--amber)';
+      btn.style.borderColor='var(--amber)';
+    }
+    setTimeout(()=>{
+      if(_pendingDel===type+id){
+        _pendingDel=null;
+        if(btn){btn.textContent='Delete';btn.style.color='';btn.style.background='';btn.style.borderColor='';}
+      }
+    },2600);
+  }
+}
+
+/* ============ RENDER ALL ============ */
+function renderAll(){renderDaily();renderDash();renderClients();renderPipe();renderContent();}
+function init(){
+  const now=new Date();
+  document.getElementById('hdate').textContent=now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  renderRhythm();
+  renderAll();
+}
+init();
+</script>
+</body>
+</html>
