@@ -16,7 +16,7 @@
     --ink: #0F0F0F;
     --ink2: #2A2A2A;
     --ink3: #555555;
-    --ink4: #888888;
+    --ink4: #6E6E6E;
     --rule: #E0E0DC;
     --rule2: #EBEBЕ7;
     --bg: #FAFAF8;
@@ -47,6 +47,8 @@
     background: var(--void);
     display: grid;
     grid-template-rows: auto 1fr auto;
+    justify-content: center;
+    grid-template-columns: minmax(0, 880px);
     padding: 44px 48px;
     position: relative;
     overflow: hidden;
@@ -94,7 +96,7 @@
     font-size: 9px;
     letter-spacing: 0.4em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.5);
     padding-top: 4px;
   }
 
@@ -112,7 +114,7 @@
     font-size: 10px;
     letter-spacing: 0.5em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.55);
     display: block;
     margin-bottom: 28px;
   }
@@ -129,20 +131,20 @@
 
   .c-title em {
     font-style: italic;
-    color: rgba(255,255,255,0.38);
+    color: rgba(255,255,255,0.6);
     display: block;
   }
 
   .c-text {
     font-size: 15px;
     line-height: 1.9;
-    color: rgba(255,255,255,0.42);
+    color: rgba(255,255,255,0.72);
     max-width: 480px;
     margin-bottom: 48px;
   }
 
   .c-text strong {
-    color: rgba(255,255,255,0.65);
+    color: rgba(255,255,255,0.95);
     font-weight: 400;
   }
 
@@ -197,7 +199,7 @@
   .c-footer-note {
     font-size: 9px;
     letter-spacing: 0.25em;
-    color: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.45);
     text-transform: uppercase;
     line-height: 1.8;
   }
@@ -611,7 +613,7 @@
     font-size: 9px;
     letter-spacing: 0.4em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.5);
     margin-bottom: 16px;
     display: block;
   }
@@ -635,7 +637,7 @@
   .ty-step-n {
     font-family: 'Playfair Display', serif;
     font-size: 13px;
-    color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.5);
     min-width: 20px;
     padding-top: 2px;
   }
@@ -657,7 +659,7 @@
     font-size: 9px;
     letter-spacing: 0.4em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.5);
     margin-bottom: 24px;
   }
 
@@ -675,7 +677,7 @@
     font-size: 9px;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.5);
     padding-top: 3px;
   }
 
@@ -1054,7 +1056,7 @@
   // Get it free at formspree.io — takes 2 minutes
   // Replace YOUR_FORM_ID with your actual ID from formspree.io
   // Sign up free at formspree.io → Create Form → copy the ID
-  const FORMSPREE_ID = 'YOUR_FORM_ID';
+  const FORMSPREE_ID = 'xykadyky';
 
   async function submitIntake() {
     const rows = [
