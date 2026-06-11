@@ -312,7 +312,6 @@
 <script>
   // ── INQUIRY FORM ──
   // Replace YOUR_FORM_ID with your Formspree ID (formspree.io → New Form → copy ID).
-  // Until then, the form falls back to opening an email to kaya.standen@gmail.com.
   const FORMSPREE_ID = 'xqeodkar';
 
   async function submitInquiry() {
@@ -347,7 +346,7 @@
           throw new Error('bad response');
         }
       } catch (e) {
-        msg.textContent = 'Something went wrong. Email me directly at kaya.standen@gmail.com.';
+        msg.textContent = 'Something went wrong. Email me directly at kaya@standencommunications.com.';
         msg.className = 'inq-msg';
       }
       btn.disabled = false;
@@ -355,14 +354,9 @@
       return;
     }
 
-    // Fallback: open email client
-    const body = encodeURIComponent(
-      'Name: ' + name + '\nRole & Company: ' + role + '\nEmail: ' + email + '\n\nLinkedIn presence right now:\n' + presence
-    );
-    window.location.href = 'mailto:kaya.standen@gmail.com?subject=' +
-      encodeURIComponent('Standen \u2014 Starting a conversation') + '&body=' + body;
-    msg.textContent = 'Opening your email app\u2026 if nothing happens, write me at kaya.standen@gmail.com.';
-    msg.className = 'inq-msg ok';
+    // No mail-app fallback: always handle on-page
+    msg.textContent = 'The form is being set up. Please email me directly: kaya@standencommunications.com';
+    msg.className = 'inq-msg';
   }
 </script>
 
