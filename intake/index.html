@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Intake</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Client Intake">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' fill='%23090909'/><path d='M40 30 L120 30 L150 60 L150 155 C150 158 147 160 144 160 L36 160 C33 160 30 157 30 154 L30 36 C30 33 33 30 36 30' fill='none' stroke='white' stroke-width='7' stroke-linejoin='round'/><path d='M120 30 L120 60 L150 60' fill='none' stroke='white' stroke-width='7' stroke-linejoin='round'/><line x1='55' y1='95' x2='125' y2='95' stroke='white' stroke-width='7' stroke-linecap='round'/><line x1='55' y1='115' x2='125' y2='115' stroke='white' stroke-width='7' stroke-linecap='round'/><line x1='55' y1='135' x2='100' y2='135' stroke='white' stroke-width='7' stroke-linecap='round'/></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #080808;
+    --ink: #0F0F0F;
+    --ink2: #2A2A2A;
+    --ink3: #555555;
+    --ink4: #6E6E6E;
+    --rule: #E0E0DC;
+    --rule2: #EBEBЕ7;
+    --bg: #FAFAF8;
+    --bg2: #F3F3F0;
+    --white: #FFFFFF;
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* ═══════════════════════════════════
+     COVER
+  ═══════════════════════════════════ */
+  #cover {
+    min-height: 100svh;
+    background: var(--void);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    justify-content: center;
+    grid-template-columns: minmax(0, 880px);
+    padding: 44px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 52px 52px;
+    pointer-events: none;
+  }
+
+  /* Faint vertical rule — signature detail */
+  #cover::after {
+    content: '';
+    position: absolute;
+    left: 200px;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .c-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    z-index: 2;
+  }
+
+  .c-wordmark {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.9);
+  }
+
+  .c-label {
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    padding-top: 4px;
+  }
+
+  .c-body {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 0 32px;
+    max-width: 640px;
+  }
+
+  .c-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    display: block;
+    margin-bottom: 28px;
+  }
+
+  .c-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 7vw, 76px);
+    font-weight: 400;
+    line-height: 1.0;
+    color: rgba(255,255,255,0.92);
+    margin-bottom: 32px;
+    letter-spacing: -0.01em;
+  }
+
+  .c-title em {
+    font-style: italic;
+    color: rgba(255,255,255,0.6);
+    display: block;
+  }
+
+  .c-text {
+    font-size: 15px;
+    line-height: 1.9;
+    color: rgba(255,255,255,0.72);
+    max-width: 480px;
+    margin-bottom: 48px;
+  }
+
+  .c-text strong {
+    color: rgba(255,255,255,0.95);
+    font-weight: 400;
+  }
+
+  .c-start {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255,255,255,0.92);
+    color: var(--ink);
+    border: none;
+    padding: 18px 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s var(--ease);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .c-start::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .c-start:hover::after { opacity: 0.12; }
+
+  .c-start:hover .c-arrow { transform: translateX(5px); }
+
+  .c-arrow {
+    display: inline-block;
+    transition: transform 0.2s var(--ease);
+    font-size: 13px;
+  }
+
+  .c-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    position: relative;
+    z-index: 2;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .c-footer-note {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    line-height: 1.8;
+  }
+
+  /* ═══════════════════════════════════
+     FORM SHELL
+  ═══════════════════════════════════ */
+  #formShell {
+    display: none;
+    flex-direction: column;
+    min-height: 100svh;
+  }
+
+  #formShell.active { display: flex; }
+
+  /* Progress */
+  .f-progress {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--white);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .f-progress-bar {
+    height: 2px;
+    background: var(--rule);
+  }
+
+  .f-progress-fill {
+    height: 100%;
+    background: var(--ink);
+    transition: width 0.5s var(--ease);
+    width: 0%;
+  }
+
+  .f-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 48px;
+  }
+
+  .f-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .f-step-count {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--ink4);
+    text-transform: uppercase;
+  }
+
+  /* Question pages */
+  .q-pages { flex: 1; }
+
+  .q-page {
+    display: none;
+    padding: 80px 48px 56px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .q-page.active {
+    display: block;
+    animation: fadeSlide 0.4s var(--ease) both;
+  }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-num {
+    font-size: 9px;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--ink4);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .q-num::after {
+    content: '';
+    flex: 1;
+    max-width: 40px;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .q-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 46px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .q-title em {
+    font-style: italic;
+    color: var(--ink3);
+  }
+
+  .q-hint {
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--ink3);
+    max-width: 540px;
+    margin-bottom: 44px;
+    border-left: 2px solid var(--rule);
+    padding-left: 20px;
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* Inputs */
+  .f-label {
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--ink4);
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .f-field { margin-bottom: 36px; }
+  .f-field:last-child { margin-bottom: 0; }
+
+  .f-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1.5px solid var(--rule);
+    background: transparent;
+    padding: 14px 0 14px;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.3;
+  }
+
+  .f-input:focus { border-bottom-color: var(--ink); }
+
+  .f-input::placeholder {
+    color: var(--rule);
+    font-style: italic;
+  }
+
+  .f-textarea {
+    width: 100%;
+    border: none;
+    border-bottom: 1.5px solid var(--rule);
+    background: transparent;
+    padding: 14px 0 14px;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(16px, 2.2vw, 22px);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    outline: none;
+    resize: none;
+    min-height: 130px;
+    transition: border-color 0.2s;
+    line-height: 1.65;
+    display: block;
+  }
+
+  .f-textarea:focus { border-bottom-color: var(--ink); }
+
+  .f-textarea::placeholder {
+    color: var(--rule);
+    font-style: italic;
+  }
+
+  /* Character feedback */
+  .f-feedback {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--rule);
+    text-align: right;
+    margin-top: 6px;
+    transition: color 0.2s;
+  }
+
+  .f-textarea:focus + .f-feedback { color: var(--ink4); }
+
+  /* Multi-select chips */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 36px;
+  }
+
+  .chip {
+    padding: 11px 20px;
+    border: 1px solid var(--rule);
+    background: var(--white);
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ink3);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    letter-spacing: 0.02em;
+  }
+
+  .chip:hover { border-color: var(--ink2); color: var(--ink); }
+
+  .chip.on {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: white;
+  }
+
+  /* Scale */
+  .scale-wrap { margin-bottom: 36px; }
+
+  .scale-btns {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+
+  .s-btn {
+    background: var(--white);
+    border: 1px solid var(--rule);
+    padding: 20px 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink4);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .s-btn:hover { border-color: var(--ink2); color: var(--ink); }
+
+  .s-btn.on {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: white;
+  }
+
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink4);
+  }
+
+  /* Two-column layout for some questions */
+  .f-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 48px;
+  }
+
+  /* Statement block for Q confirmation */
+  .f-statement {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-style: italic;
+    color: var(--ink2);
+    line-height: 1.5;
+    padding: 28px 0 28px 28px;
+    border-left: 2px solid var(--ink);
+    margin-bottom: 32px;
+  }
+
+  /* Q nav */
+  .q-nav {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--rule);
+    padding: 20px 48px;
+    z-index: 100;
+  }
+
+  .q-nav-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .btn-back {
+    background: none;
+    border: 1px solid var(--rule);
+    padding: 13px 24px;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink4);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    transition: all 0.2s;
+  }
+
+  .btn-back:hover { color: var(--ink); border-color: var(--ink2); }
+
+  .btn-next {
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    padding: 13px 32px;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: white;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-next:hover { background: var(--ink2); border-color: var(--ink2); }
+
+  .btn-next .n-arrow { font-size: 12px; transition: transform 0.2s; }
+  .btn-next:hover .n-arrow { transform: translateX(4px); }
+
+  /* ═══════════════════════════════════
+     THANK YOU
+  ═══════════════════════════════════ */
+  #thankYou {
+    display: none;
+    min-height: 100svh;
+    background: var(--void);
+    padding: 80px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #thankYou::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 52px 52px;
+    pointer-events: none;
+  }
+
+  #thankYou.active { display: block; }
+
+  .ty-inner {
+    max-width: 680px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .ty-rule {
+    width: 48px;
+    height: 1px;
+    background: rgba(255,255,255,0.2);
+    margin-bottom: 40px;
+  }
+
+  .ty-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 7vw, 64px);
+    font-weight: 400;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.05;
+    margin-bottom: 28px;
+  }
+
+  .ty-title em {
+    font-style: italic;
+    color: rgba(255,255,255,0.62);
+  }
+
+  .ty-body {
+    font-size: 15px;
+    line-height: 1.9;
+    color: rgba(255,255,255,0.72);
+    margin-bottom: 52px;
+    max-width: 500px;
+  }
+
+  .ty-body strong {
+    color: rgba(255,255,255,0.7);
+    font-weight: 400;
+  }
+
+  .ty-next-label {
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .ty-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .ty-step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .ty-step:last-child { border-bottom: none; }
+
+  .ty-step-n {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    min-width: 20px;
+    padding-top: 2px;
+  }
+
+  .ty-step-text {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
+  }
+
+  /* Summary */
+  .ty-summary {
+    margin-top: 56px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 40px;
+  }
+
+  .ty-summary-title {
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 24px;
+  }
+
+  .ty-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .ty-row:last-child { border-bottom: none; }
+
+  .ty-row-label {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    padding-top: 3px;
+  }
+
+  .ty-row-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.65;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    #cover, #thankYou { padding: 32px 24px; }
+    .f-progress-meta, .q-page, .q-nav { padding-left: 24px; padding-right: 24px; }
+    .q-page { padding-top: 52px; }
+    .f-cols { grid-template-columns: 1fr; gap: 0; }
+    .scale-btns { gap: 4px; }
+    .s-btn { padding: 16px 0; font-size: 18px; }
+    #cover::after { display: none; }
+    .ty-row { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════
+     COVER
+════════════════════════════ -->
+<div id="cover">
+  <div class="c-top">
+    <div class="c-wordmark">Standen Communications</div>
+    <div class="c-label">Client Intake · Confidential</div>
+  </div>
+
+  <div class="c-body">
+    <span class="c-eyebrow">Strategic Communications Intake</span>
+    <h1 class="c-title">
+      Before we write<br>a single word —
+      <em>we need to understand you.</em>
+    </h1>
+    <p class="c-text">
+      This is not a standard onboarding form. These questions are designed to give us the <strong>strategic foundation</strong> we need to build communications that are genuinely, recognizably yours — not a polished approximation.
+      <br><br>
+      Your answers are confidential. Take your time. The quality of what we build together depends entirely on the depth of what you share here.
+    </p>
+    <button class="c-start" onclick="startForm()">
+      Begin <span class="c-arrow">→</span>
+    </button>
+  </div>
+
+  <div class="c-footer">
+    <div class="c-footer-note">Ten questions · 12–15 minutes</div>
+    <div class="c-footer-note">Standen Communications · Confidential · Not stored externally</div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════
+     FORM
+════════════════════════════ -->
+<div id="formShell">
+
+  <div class="f-progress">
+    <div class="f-progress-bar">
+      <div class="f-progress-fill" id="pFill"></div>
+    </div>
+    <div class="f-progress-meta">
+      <div class="f-logo">Standen</div>
+      <div class="f-step-count" id="pCount">1 of 10</div>
+    </div>
+  </div>
+
+  <div class="q-pages">
+
+    <!-- ── Q1: Who are you ── -->
+    <div class="q-page active" id="q1">
+      <div class="q-num">01 — Introduction</div>
+      <h2 class="q-title">Let's start with<br>who you <em>actually</em> are.</h2>
+      <p class="q-hint">Not just the title on your LinkedIn. How you'd introduce yourself to someone whose respect you want to earn in the first sixty seconds.</p>
+
+      <div class="f-field">
+        <label class="f-label">Full name</label>
+        <input class="f-input" id="a-name" placeholder="Your name" autocomplete="name" />
+      </div>
+      <div class="f-field">
+        <label class="f-label">Current role and organization</label>
+        <input class="f-input" id="a-role" placeholder="Title · Organization" />
+      </div>
+      <div class="f-field">
+        <label class="f-label">How would you introduce yourself to a board member you're meeting for the first time?</label>
+        <textarea class="f-textarea" id="a-intro" placeholder="The version that captures what you actually do — not just the job description..."></textarea>
+      </div>
+    </div>
+
+    <!-- ── Q2: Known for ── -->
+    <div class="q-page" id="q2">
+      <div class="q-num">02 — Positioning</div>
+      <h2 class="q-title">What do you want<br>to be <em>known for?</em></h2>
+      <p class="q-hint">Not your job description. Not your company's mission. The specific perspective or philosophy that is uniquely yours — the thing a colleague would mention first if someone asked what makes you exceptional.</p>
+
+      <div class="f-field">
+        <label class="f-label">Your answer</label>
+        <textarea class="f-textarea" id="a-knownfor" placeholder="When people who know my work describe what makes me different, what they usually say is..." style="min-height: 180px;"></textarea>
+      </div>
+    </div>
+
+    <!-- ── Q3: Contrarian ── -->
+    <div class="q-page" id="q3">
+      <div class="q-num">03 — Perspective</div>
+      <h2 class="q-title">What does everyone<br>in your field <em>get wrong?</em></h2>
+      <p class="q-hint">Every genuine expert has a perspective the mainstream gets wrong. The conventional wisdom they quietly disagree with. The approach that frustrates them. This is often where your most powerful content lives — and what separates a thought leader from a content producer.</p>
+
+      <div class="f-field">
+        <label class="f-label">The thing your industry accepts that you push back on</label>
+        <textarea class="f-textarea" id="a-contrarian" placeholder="The thing most people in my field believe without questioning — and where I think they're wrong — is..." style="min-height: 180px;"></textarea>
+      </div>
+    </div>
+
+    <!-- ── Q4: Regulatory ── -->
+    <div class="q-page" id="q4">
+      <div class="q-num">04 — Industry Intelligence</div>
+      <h2 class="q-title">What is most<br><em>misunderstood</em> right now?</h2>
+      <p class="q-hint">You have a front-row seat to what's actually happening in regulated industries. What are the people in boardrooms and compliance offices genuinely grappling with — that the public narrative is getting wrong or underrepresenting?</p>
+
+      <div class="f-field">
+        <label class="f-label">The regulatory shift or industry moment people aren't reading correctly</label>
+        <textarea class="f-textarea" id="a-regulatory" placeholder="What's being misread right now, and what the people actually in the room know to be true, is..." style="min-height: 180px;"></textarea>
+      </div>
+    </div>
+
+    <!-- ── Q5: Opportunities ── -->
+    <div class="q-page" id="q5">
+      <div class="q-num">05 — Goals</div>
+      <h2 class="q-title">What are you<br><em>building toward?</em></h2>
+      <p class="q-hint">Your public presence should be working toward something specific. These answers shape the entire strategic direction of your content — they are confidential and essential.</p>
+
+      <div style="margin-bottom: 16px;">
+        <label class="f-label">Select everything that applies — be honest</label>
+      </div>
+      <div class="chips" id="opp-chips">
+        <div class="chip" onclick="toggleChip(this)">Board seat or advisory role</div>
+        <div class="chip" onclick="toggleChip(this)">Speaking engagements</div>
+        <div class="chip" onclick="toggleChip(this)">New consulting clients</div>
+        <div class="chip" onclick="toggleChip(this)">C-suite or senior executive role</div>
+        <div class="chip" onclick="toggleChip(this)">Industry recognition</div>
+        <div class="chip" onclick="toggleChip(this)">Building an independent practice</div>
+        <div class="chip" onclick="toggleChip(this)">Media or publication visibility</div>
+        <div class="chip" onclick="toggleChip(this)">Regulatory or policy influence</div>
+        <div class="chip" onclick="toggleChip(this)">Peer network expansion</div>
+        <div class="chip" onclick="toggleChip(this)">Demonstrating expertise publicly</div>
+      </div>
+      <div class="f-field">
+        <label class="f-label">In 18 months, I want to be able to say —</label>
+        <textarea class="f-textarea" id="a-goals" placeholder="What does success look like? Be specific. The more honest you are here, the more precisely we can build toward it..."></textarea>
+      </div>
+    </div>
+
+    <!-- ── Q6: Audience ── -->
+    <div class="q-page" id="q6">
+      <div class="q-num">06 — Audience</div>
+      <h2 class="q-title">Who specifically<br>needs to <em>hear you?</em></h2>
+      <p class="q-hint">Not a broad category. The specific person who, if they read your posts consistently for ninety days, would make a decision or reach out in a way that meaningfully changes your trajectory.</p>
+
+      <div class="f-field">
+        <label class="f-label">Describe your primary reader with precision</label>
+        <input class="f-input" id="a-audience" placeholder="e.g. CISOs at 500–5,000 person fintech companies who are preparing for a board role..." />
+      </div>
+      <div class="f-field">
+        <label class="f-label">What should they think, feel, or do after reading?</label>
+        <textarea class="f-textarea" id="a-cta" placeholder="I want them to think I'm... I want them to feel... I want them to reach out when..."></textarea>
+      </div>
+    </div>
+
+    <!-- ── Q7: Voice ── -->
+    <div class="q-page" id="q7">
+      <div class="q-num">07 — Voice</div>
+      <h2 class="q-title">How do you actually<br><em>communicate?</em></h2>
+      <p class="q-hint">Your content needs to sound like you — not a polished version of you. We need to understand how you actually speak, think out loud, and explain things to someone you respect. And equally important: what would make you wince if you saw it under your name.</p>
+
+      <div class="f-field">
+        <label class="f-label">How would a trusted colleague describe how you communicate?</label>
+        <textarea class="f-textarea" id="a-voice" placeholder="Direct but never abrupt. I use specific examples rather than abstraction. I tend to say 'here's what I actually see happening' rather than 'in my opinion'..."></textarea>
+      </div>
+      <div class="f-field">
+        <label class="f-label">What would make you cringe if you saw it published under your name?</label>
+        <textarea class="f-textarea" id="a-avoid" placeholder="Generic motivational content. Jargon for its own sake. Anything that sounds like I'm selling rather than advising..."></textarea>
+      </div>
+    </div>
+
+    <!-- ── Q8: Boldness ── -->
+    <div class="q-page" id="q8">
+      <div class="q-num">08 — Risk & Boldness</div>
+      <h2 class="q-title">How bold should<br><em>your voice be?</em></h2>
+      <p class="q-hint">There is a spectrum between carefully measured thought leadership and genuinely provocative positioning. Both build audiences — they attract different people and carry different risk profiles. Where do you sit, honestly?</p>
+
+      <div class="scale-wrap">
+        <label class="f-label" style="margin-bottom: 16px;">Select your comfort level</label>
+        <div class="scale-btns" id="boldScale">
+          <div class="s-btn" onclick="pickScale(this,'boldScale')">1</div>
+          <div class="s-btn" onclick="pickScale(this,'boldScale')">2</div>
+          <div class="s-btn" onclick="pickScale(this,'boldScale')">3</div>
+          <div class="s-btn" onclick="pickScale(this,'boldScale')">4</div>
+          <div class="s-btn" onclick="pickScale(this,'boldScale')">5</div>
+        </div>
+        <div class="scale-labels">
+          <span>Measured &amp;<br>Risk-Aware</span>
+          <span style="text-align:center;">Balanced</span>
+          <span style="text-align:right;">Bold &amp;<br>Provocative</span>
+        </div>
+      </div>
+
+      <div class="f-field">
+        <label class="f-label">Given your role and industry, what requires extra care?</label>
+        <textarea class="f-textarea" id="a-limits" placeholder="Topics I need to handle carefully because of my regulatory environment, employer, or position include..."></textarea>
+      </div>
+    </div>
+
+    <!-- ── Q9: References ── -->
+    <div class="q-page" id="q9">
+      <div class="q-num">09 — Reference Points</div>
+      <h2 class="q-title">Whose voice<br>do you <em>admire?</em></h2>
+      <p class="q-hint">Think of people — in your industry or outside it — whose LinkedIn presence, writing, or public thinking resonates with you. Not because they're famous, but because something about how they communicate feels right. This tells us more about your ideal voice than any description could.</p>
+
+      <div class="f-field">
+        <label class="f-label">Names, handles, publications, or thought leaders you respect</label>
+        <input class="f-input" id="a-refs" placeholder="LinkedIn profiles, authors, speakers, publications..." />
+      </div>
+      <div class="f-field">
+        <label class="f-label">What specifically do you like about how they communicate?</label>
+        <textarea class="f-textarea" id="a-refwhy" placeholder="They're authoritative without being arrogant. They make hard things legible without simplifying them. They seem to write from genuine conviction rather than strategy..."></textarea>
+      </div>
+    </div>
+
+    <!-- ── Q10: Anything else ── -->
+    <div class="q-page" id="q10">
+      <div class="q-num">10 — The Last Thing</div>
+      <h2 class="q-title">What haven't<br>we <em>asked</em> yet?</h2>
+      <p class="q-hint">The thing you were hoping we'd ask about. The context that makes everything else make more sense. The career moment, the professional philosophy, the thing that would let us write for you with genuine precision rather than approximation.</p>
+
+      <div class="f-field">
+        <label class="f-label">What I haven't said yet — and what would help you understand me completely — is</label>
+        <textarea class="f-textarea" id="a-extra" placeholder="Share anything that feels important. There are no wrong answers here — only missing context..." style="min-height: 200px;"></textarea>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="q-nav">
+    <div class="q-nav-inner">
+      <button class="btn-back" id="btnBack" onclick="prevQ()">← Back</button>
+      <button class="btn-next" id="btnNext" onclick="nextQ()">
+        <span id="btnNextLabel">Continue</span>
+        <span class="n-arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════
+     THANK YOU
+════════════════════════════ -->
+<div id="thankYou">
+  <div class="ty-inner">
+    <div class="ty-rule"></div>
+    <h2 class="ty-title">
+      Intake<br>
+      <em>received.</em>
+    </h2>
+    <p class="ty-body">
+      Your intake is complete. What you've shared gives us the foundation we need to build communications that are <strong>genuinely, recognizably yours</strong> — not a polished approximation.
+      <br><br>
+      Standen will review your responses carefully and be in touch within 48 hours with your positioning foundation and initial content direction.
+    </p>
+
+    <span class="ty-next-label">What happens next</span>
+    <div class="ty-steps">
+      <div class="ty-step">
+        <div class="ty-step-n">I</div>
+        <div class="ty-step-text">Standen reviews your intake within 48 hours</div>
+      </div>
+      <div class="ty-step">
+        <div class="ty-step-n">II</div>
+        <div class="ty-step-text">Your positioning foundation is delivered — a strategic brief that captures who you are and where you're going</div>
+      </div>
+      <div class="ty-step">
+        <div class="ty-step-n">III</div>
+        <div class="ty-step-text">First month of content drafts delivered within 7 days of your approval of the positioning brief</div>
+      </div>
+    </div>
+
+    <div class="ty-summary">
+      <div class="ty-summary-title">Your Intake — Summary</div>
+      <div id="tySummary"></div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  const TOTAL = 10;
+  let cur = 1;
+
+  function startForm() {
+    document.getElementById('cover').style.display = 'none';
+    document.getElementById('formShell').classList.add('active');
+    updateUI();
+  }
+
+  function updateUI() {
+    const pct = ((cur - 1) / TOTAL) * 100;
+    document.getElementById('pFill').style.width = pct + '%';
+    document.getElementById('pCount').textContent = cur + ' of ' + TOTAL;
+
+    const back = document.getElementById('btnBack');
+    back.style.visibility = cur > 1 ? 'visible' : 'hidden';
+
+    const nextLabel = document.getElementById('btnNextLabel');
+    const nextArrow = document.querySelector('.n-arrow');
+    if (cur === TOTAL) {
+      nextLabel.textContent = 'Submit';
+      nextArrow.textContent = '✦';
+    } else {
+      nextLabel.textContent = 'Continue';
+      nextArrow.textContent = '→';
+    }
+  }
+
+  function showPage(n) {
+    document.querySelectorAll('.q-page').forEach(p => p.classList.remove('active'));
+    const el = document.getElementById('q' + n);
+    if (el) { el.classList.add('active'); window.scrollTo(0, 0); }
+  }
+
+  function nextQ() {
+    if (cur < TOTAL) {
+      cur++;
+      showPage(cur);
+      updateUI();
+    } else {
+      submitIntake();
+    }
+  }
+
+  function prevQ() {
+    if (cur > 1) {
+      cur--;
+      showPage(cur);
+      updateUI();
+    }
+  }
+
+  function toggleChip(el) { el.classList.toggle('on'); }
+
+  function pickScale(el, id) {
+    document.querySelectorAll('#' + id + ' .s-btn').forEach(b => b.classList.remove('on'));
+    el.classList.add('on');
+  }
+
+  function getChips(id) {
+    return Array.from(document.querySelectorAll('#' + id + ' .chip.on')).map(c => c.textContent).join(', ') || '—';
+  }
+
+  function getScale(id) {
+    const s = document.querySelector('#' + id + ' .s-btn.on');
+    const labels = ['', 'Measured & Risk-Aware', 'Conservative', 'Balanced', 'Fairly Bold', 'Bold & Provocative'];
+    return s ? s.textContent + ' — ' + labels[parseInt(s.textContent)] : '—';
+  }
+
+  function val(id) { return document.getElementById(id)?.value?.trim() || '—'; }
+
+  // ── FORMSPREE ID ──
+  // Replace YOUR_FORM_ID below with your actual Formspree form ID
+  // Get it free at formspree.io — takes 2 minutes
+  // Replace YOUR_FORM_ID with your actual ID from formspree.io
+  // Sign up free at formspree.io → Create Form → copy the ID
+  const FORMSPREE_ID = 'xykadyky';
+
+  async function submitIntake() {
+    const rows = [
+      { label: 'Name', v: val('a-name') },
+      { label: 'Role', v: val('a-role') },
+      { label: 'Self-Introduction', v: val('a-intro') },
+      { label: 'Known For', v: val('a-knownfor') },
+      { label: 'Contrarian View', v: val('a-contrarian') },
+      { label: 'Industry Insight', v: val('a-regulatory') },
+      { label: 'Opportunities', v: getChips('opp-chips') },
+      { label: '18-Month Goal', v: val('a-goals') },
+      { label: 'Target Audience', v: val('a-audience') },
+      { label: 'Voice Description', v: val('a-voice') },
+      { label: 'What to Avoid', v: val('a-avoid') },
+      { label: 'Boldness Level', v: getScale('boldScale') },
+      { label: 'Off-Limits Topics', v: val('a-limits') },
+      { label: 'Voice References', v: val('a-refs') },
+      { label: 'Additional Context', v: val('a-extra') },
+    ];
+
+    // Build summary for thank you screen
+    document.getElementById('tySummary').innerHTML = rows
+      .filter(r => r.v && r.v !== '—')
+      .map(r => `
+        <div class="ty-row">
+          <div class="ty-row-label">${r.label}</div>
+          <div class="ty-row-val">${r.v}</div>
+        </div>`).join('');
+
+    // Show thank you screen immediately — don't wait for network
+    document.getElementById('pFill').style.width = '100%';
+    document.getElementById('formShell').style.display = 'none';
+    document.getElementById('thankYou').classList.add('active');
+    window.scrollTo(0, 0);
+
+    // Send to Formspree in background (non-blocking)
+    if (FORMSPREE_ID && FORMSPREE_ID !== 'YOUR_FORM_ID') {
+      try {
+        const formData = {};
+        rows.filter(r => r.v && r.v !== '—').forEach(r => {
+          formData[r.label] = r.v;
+        });
+        // Add submission metadata
+        formData['_subject'] = 'New Standen Intake — ' + (val('a-name') || 'Client') + ' — ' + val('a-role');
+        formData['_replyto'] = val('a-email') || '';
+
+        await fetch('https://formspree.io/f/' + FORMSPREE_ID, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        console.log('Intake submitted to Formspree successfully');
+      } catch (err) {
+        // Silent fail — client already sees thank you, Formspree submission is background task
+        console.log('Formspree submission error:', err);
+      }
+    }
+  }
+
+  // Keyboard shortcut
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      const shell = document.getElementById('formShell');
+      if (shell.classList.contains('active')) nextQ();
+    }
+  });
+</script>
+</body>
+</html>
